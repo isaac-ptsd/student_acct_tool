@@ -54,7 +54,9 @@ def main():
                                    'id',
                                    'grade',
                                    'destinationOU',
-                                   'memberOf'])
+                                   'memberOf',
+                                   'PasswordNeverExpires',
+                                   'UserCannotChangePassword'])
     school_dict = {374: 'PHS', 373: 'TMS', 372: 'TES', 371: 'PES', 370: 'OES', 3247: 'ATI', 375: 'STEPS',
                    376: 'Transition', 1474: 'Crossroads'}
     # populate out_df
@@ -103,6 +105,10 @@ def main():
         # CN=Phs-Student,OU=Students,DC=phoenix,DC=k12,DC=or,DC=12
         out_df.at[index, 'memberOf'] = 'CN=' + school.lower().capitalize() \
                                        + '-Student,OU=Students,DC=phoenix,DC=k12,DC=or,DC=12'
+        # always True
+        out_df.at[index, 'PasswordNeverExpires'] = 'True'
+        # always True
+        out_df.at[index, 'UserCannotChangePassword'] = 'True'
 
     out_df_by_school = out_df.groupby(['department', 'grade'])
     for group, data in out_df_by_school:
