@@ -63,42 +63,47 @@ def main():
     for index, row in in_df.iterrows():
         school = school_dict[row['school_id']]
         ou_str = 'OU=' + school.lower() + ',OU=Students,DC=phoenix,DC=k12,DC=or,DC=us'
-        first_last = row['first_name'] + '.' + row['last_name']
+        if len(str(row['grade_level'])) >= 2:
+            grade_level = str(row['grade_level'])
+        else:
+            grade_level = '0' + str(row['grade_level'])
+
+        first_last = row['first_name'] + '.' + row['last_name'].split()[0]
         if len(first_last) >= 18:
-            first_last = row['first_name'][:1] + '.' + row['last_name']
+            first_last = row['first_name'][:1] + '.' + row['last_name'][0]
 
         # 0 + grade_level + " " + last_name + ", " first_name
-        out_df.at[index, 'cn'] = '0' + str(row['grade_level']) + row['last_name'] + row['first_name']
+        out_df.at[index, 'cn'] = grade_level + ' ' + row['last_name'].split()[0] + ', ' + row['first_name']
         # School ex: PHS
         out_df.at[index, 'department'] = school
         # ex: PHS Student
         out_df.at[index, 'description'] = school + ' Student'
         # === cn
-        out_df.at[index, 'displayName'] = '0' + str(row['grade_level']) + ' ' + row['last_name'] + ', ' + row['first_name']
+        out_df.at[index, 'displayName'] = grade_level + ' ' + row['last_name'].split()[0] + ', ' + row['first_name']
         # CN=010Aguirre\ ,Angel,OU=phs,OU=Students,DC=phoenix,DC=k12,DC=or,DC=us
-        out_df.at[index, 'distinguishedName'] = 'CN=0' + str(row['grade_level']) + row['last_name'] + '\\ ,' \
-                                                + row['first_name'] + ou_str
+        out_df.at[index, 'distinguishedName'] = 'CN=0' + grade_level + row['last_name'].split()[0] \
+                                                + '\\ ,' + row['first_name'] + ', ' + ou_str
         # Angel
         out_df.at[index, 'givenName'] = row['first_name']
         # \\studentdata\phs-students\010Angel.Aguirre
-        out_df.at[index, 'homeDirectory'] = '\\\\studentdata\\' + school.lower() + '-students\\0' \
-                                            + str(row['grade_level']) + first_last
+        out_df.at[index, 'homeDirectory'] = '\\\\studentdata\\' + school.lower() + '-students\\' \
+                                            + grade_level + first_last
         # Angel.Aguirre@phoenixk12.org
-        out_df.at[index, 'mail'] = row['first_name'] + '.' + row['last_name'] + '@phoenixk12.org'
+        out_df.at[index, 'mail'] = row['first_name'] + '.' + row['last_name'].split()[0] + '@phoenixk12.org'
         # 10Angel.Aguirre
-        out_df.at[index, 'sAMAccountName'] = '0' + str(row['grade_level']) + row['first_name'] + '.' + row['last_name']
+        out_df.at[index, 'sAMAccountName'] = grade_level + row['first_name'] + '.' + row['last_name'].split()[0]
         # Aguirre
-        out_df.at[index, 'sn'] = row['last_name']
+        out_df.at[index, 'sn'] = row['last_name'].split()[0]
         # Phs18648
         out_df.at[index, 'Password'] = school.lower().capitalize() + '' + str(row['student_number'])
         # 010Angel.Aguirre
-        out_df.at[index, 'userPrincipalName'] = '0' + str(row['grade_level']) + first_last
+        out_df.at[index, 'userPrincipalName'] = grade_level + first_last
         # always True
         out_df.at[index, 'CreateHomeDirectory'] = 'True'
         # student number
         out_df.at[index, 'id'] = row['student_number']
         # ex: 10
-        out_df.at[index, 'grade'] = '0' + str(row['grade_level'])
+        out_df.at[index, 'grade'] = grade_level
         # OU=Phs,OU=Students,DC=phoenix,DC=k12,DC=or,DC=us
         out_df.at[index, 'destinationOU'] = 'OU=' + school.lower().capitalize() \
                                             + ',OU=Students,DC=phoenix,DC=k12,DC=or,DC=us'
