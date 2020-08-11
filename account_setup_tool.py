@@ -4,6 +4,10 @@ import pandas as pd
 import os.path
 
 
+def isNaN(num):
+    return num != num
+
+
 @Gooey(program_name="Account Setup Tool")
 def main():
     parser = GooeyParser(description='PowerSchool export to Dovestone/Active Directory import file')
@@ -24,7 +28,7 @@ def main():
     ps_export_csv_in = user_inputs['PowerSchool Data Export']
 
     # NOTE: the in_df columns are: ['student_number', 'last_name', 'first_name', 'grade_level', 'school_id',
-    #                               'web_id', 'web_password', 'student_web_id', 'student_web_password']
+    #                               'web_id', 'web_password', 'student_web_id', 'student_web_password', 'student_email]
     in_df = pd.read_csv(ps_export_csv_in)
     out_df = pd.DataFrame(columns=['cn',
                                    'department',
@@ -55,20 +59,26 @@ def main():
             grade_level = str(row['grade_level'])
         else:
             grade_level = '0' + str(row['grade_level'])
-        first_last = row['first_name'] + '.' + row['last_name'].split()[0]
+        first_last = row['first_name'].replace('-', ' ').split()[0] + '.' + \
+                     row['last_name'].replace('-', ' ').split()[0]
         if len(first_last) >= 18:
-            first_last = row['first_name'][:1] + '.' + row['last_name'].split()[0]
+            first_last = row['first_name'][:1] + '.' + row['last_name'].replace('-', ' ').split()[0]
+        student_email = row['student_email']
+        if isNaN(student_email):
+            print('here')
+            student_email = first_last + '@phoenixk12.org'
 
         # 0 + grade_level + " " + last_name + ", " first_name
-        out_df.at[index, 'cn'] = grade_level + ' ' + row['last_name'].split()[0] + ', ' + row['first_name']
+        out_df.at[index, 'cn'] = grade_level + ' ' + row['last_name'].replace('-', ' ').split()[0] + ', ' + row['first_name']
         # School ex: PHS
         out_df.at[index, 'department'] = school
         # ex: PHS Student
         out_df.at[index, 'description'] = school + ' Student'
         # === cn
-        out_df.at[index, 'displayName'] = grade_level + ' ' + row['last_name'].split()[0] + ', ' + row['first_name']
+        out_df.at[index, 'displayName'] = grade_level + ' ' + row['last_name'].replace('-', ' ').split()[0] + ', ' + \
+                                          row['first_name']
         # CN=010Aguirre\ ,Angel,OU=phs,OU=Students,DC=phoenix,DC=k12,DC=or,DC=us
-        out_df.at[index, 'distinguishedName'] = 'CN=0' + grade_level + row['last_name'].split()[0] \
+        out_df.at[index, 'distinguishedName'] = 'CN=' + grade_level + row['last_name'].replace('-', ' ').split()[0] \
                                                 + '\\ ,' + row['first_name'] + ', ' + ou_str
         # Angel
         out_df.at[index, 'givenName'] = row['first_name']
@@ -76,11 +86,11 @@ def main():
         out_df.at[index, 'homeDirectory'] = '\\\\studentdata\\' + school.lower() + '-students\\' \
                                             + grade_level + first_last
         # Angel.Aguirre@phoenixk12.org
-        out_df.at[index, 'mail'] = first_last + '@phoenixk12.org'
+        out_df.at[index, 'mail'] = student_email
         # 10Angel.Aguirre
         out_df.at[index, 'sAMAccountName'] = grade_level + first_last
         # Aguirre
-        out_df.at[index, 'sn'] = row['last_name'].split()[0]
+        out_df.at[index, 'sn'] = row['last_name'].replace('-', ' ').split()[0]
         # Phs18648
         out_df.at[index, 'Password'] = school.lower().capitalize() + '' + str(row['student_number'])
         # 010Angel.Aguirre
