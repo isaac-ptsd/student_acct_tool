@@ -52,45 +52,51 @@ def main():
     school_dict = {374: 'PHS', 373: 'TMS', 372: 'TES', 371: 'PES', 370: 'OES', 3247: 'ATI', 375: 'STEPS',
                    376: 'Transition', 1474: 'Crossroads'}
     # populate out_df
+    bad_chars = [';', ':', '!', "*", '\'', '\"', '`']
     for index, row in in_df.iterrows():
         school = school_dict[row['school_id']]
         ou_str = 'OU=' + school.lower() + ',OU=Students,DC=phoenix,DC=k12,DC=or,DC=us'
+
         if len(str(row['grade_level'])) >= 2:
             grade_level = str(row['grade_level'])
         else:
             grade_level = '0' + str(row['grade_level'])
-        first_last = row['first_name'].replace('-', ' ').split()[0] + '.' + \
-                     row['last_name'].replace('-', ' ').split()[0]
+
+        last_name = row['last_name'].replace('-', ' ').split()[0]
+        last_name = ''.join(i for i in last_name if i not in bad_chars)
+
+        first_name = row['first_name']
+        first_name = ''.join(i for i in first_name if i not in bad_chars)
+
+        first_last = first_name + '.' + last_name
         if len(first_last) >= 18:
-            first_last = row['first_name'][:1] + '.' + row['last_name'].replace('-', ' ').split()[0]
+            first_last = first_name[:1] + '.' + last_name
+
         student_email = row['student_email']
         if isNaN(student_email):
-            print('here')
             student_email = first_last + '@phoenixk12.org'
 
         # 0 + grade_level + " " + last_name + ", " first_name
-        out_df.at[index, 'cn'] = grade_level + ' ' + row['last_name'].replace('-', ' ').split()[0] + ', ' + row['first_name']
+        out_df.at[index, 'cn'] = grade_level + ' ' + last_name + ', ' + first_name
         # School ex: PHS
         out_df.at[index, 'department'] = school
         # ex: PHS Student
         out_df.at[index, 'description'] = school + ' Student'
         # === cn
-        out_df.at[index, 'displayName'] = grade_level + ' ' + row['last_name'].replace('-', ' ').split()[0] + ', ' + \
-                                          row['first_name']
+        out_df.at[index, 'displayName'] = grade_level + ' ' + last_name + ', ' + \
+            first_name
         # CN=010Aguirre\ ,Angel,OU=phs,OU=Students,DC=phoenix,DC=k12,DC=or,DC=us
-        out_df.at[index, 'distinguishedName'] = 'CN=' + grade_level + row['last_name'].replace('-', ' ').split()[0] \
-                                                + '\\ ,' + row['first_name'] + ', ' + ou_str
+        out_df.at[index, 'distinguishedName'] = 'CN=' + grade_level + last_name + '\\ ,' + first_name + ', ' + ou_str
         # Angel
-        out_df.at[index, 'givenName'] = row['first_name']
+        out_df.at[index, 'givenName'] = first_name
         # \\studentdata\phs-students\010Angel.Aguirre
-        out_df.at[index, 'homeDirectory'] = '\\\\studentdata\\' + school.lower() + '-students\\' \
-                                            + grade_level + first_last
+        out_df.at[index, 'homeDirectory'] = '\\\\studentdata\\' + school.lower() + '-students\\' + grade_level + first_last
         # Angel.Aguirre@phoenixk12.org
         out_df.at[index, 'mail'] = student_email
         # 10Angel.Aguirre
         out_df.at[index, 'sAMAccountName'] = grade_level + first_last
         # Aguirre
-        out_df.at[index, 'sn'] = row['last_name'].replace('-', ' ').split()[0]
+        out_df.at[index, 'sn'] = last_name
         # Phs18648
         out_df.at[index, 'Password'] = school.lower().capitalize() + '' + str(row['student_number'])
         # 010Angel.Aguirre
