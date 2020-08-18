@@ -132,7 +132,6 @@ def main():
     out_df_pw_by_school = out_df_pw.groupby(out_df_pw.password.str[:3])
     for pw_group, pw_data in out_df_pw_by_school:
         pw_output_file = os.path.join(output_dir, file_name + '_' + pw_group + '_password_reset.csv')
-        print(pw_group)
         pw_data.to_csv(pw_output_file, index=False)
 
     out_df_by_school = out_df.groupby(['department', 'grade'])
