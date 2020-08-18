@@ -124,7 +124,7 @@ def main():
 
         # create CSV to reset passwords
         out_df_pw.at[index, 'memberOf'] = 'CN=' + school.lower().capitalize() \
-                                       + '-Student,OU=Students,DC=phoenix,DC=k12,DC=or,DC=12'
+                                          + '-Student,OU=Students,DC=phoenix,DC=k12,DC=or,DC=12'
         out_df_pw.at[index, 'sAMAccountName'] = grade_level + first_last
         out_df_pw.at[index, 'password'] = school.lower().capitalize() + '' + str(row['student_number'])
         out_df_pw.at[index, 'Modify'] = True
