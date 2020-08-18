@@ -49,6 +49,9 @@ def main():
                                    'memberOf',
                                    'PasswordNeverExpires',
                                    'UserCannotChangePassword'])
+    # Data frame to create CSV for resetting passwords
+    out_df_pw = pd.DataFrame(columns=['memberOf', 'sAMAccountName', 'password', 'Modify'])
+
     school_dict = {374: 'PHS', 373: 'TMS', 372: 'TES', 371: 'PES', 370: 'OES', 3247: 'ATI', 375: 'STEPS',
                    376: 'Transition', 1474: 'Crossroads'}
     # populate out_df
@@ -85,21 +88,22 @@ def main():
         # === cn
         out_df.at[index, 'displayName'] = grade_level + ' ' + last_name + ', ' + \
             first_name
-        # CN=010Aguirre\ ,Angel,OU=phs,OU=Students,DC=phoenix,DC=k12,DC=or,DC=us
+        # CN=010LastName\ ,FirstName,OU=phs,OU=Students,DC=phoenix,DC=k12,DC=or,DC=us
         out_df.at[index, 'distinguishedName'] = 'CN=' + grade_level + last_name + '\\ ,' + first_name + ', ' + ou_str
-        # Angel
+        # FirstName
         out_df.at[index, 'givenName'] = first_name
-        # \\studentdata\phs-students\010Angel.Aguirre
-        out_df.at[index, 'homeDirectory'] = '\\\\studentdata\\' + school.lower() + '-students\\' + grade_level + first_last
-        # Angel.Aguirre@phoenixk12.org
+        # \\studentdata\phs-students\010FirstName.LastName
+        out_df.at[index, 'homeDirectory'] = '\\\\studentdata\\' + school.lower() + '-students\\' +\
+                                            grade_level + first_last
+        # FirstName.LastName@phoenixk12.org
         out_df.at[index, 'mail'] = student_email
-        # 10Angel.Aguirre
+        # FirstName.LastName
         out_df.at[index, 'sAMAccountName'] = grade_level + first_last
-        # Aguirre
+        # LastName
         out_df.at[index, 'sn'] = last_name
         # Phs18648
         out_df.at[index, 'Password'] = school.lower().capitalize() + '' + str(row['student_number'])
-        # 010Angel.Aguirre
+        # 010FirstName.LastName
         out_df.at[index, 'userPrincipalName'] = grade_level + first_last
         # always True
         out_df.at[index, 'CreateHomeDirectory'] = 'True'
@@ -117,6 +121,19 @@ def main():
         out_df.at[index, 'PasswordNeverExpires'] = 'True'
         # always True
         out_df.at[index, 'UserCannotChangePassword'] = 'True'
+
+        # create CSV to reset passwords
+        out_df_pw.at[index, 'memberOf'] = 'CN=' + school.lower().capitalize() \
+                                       + '-Student,OU=Students,DC=phoenix,DC=k12,DC=or,DC=12'
+        out_df_pw.at[index, 'sAMAccountName'] = grade_level + first_last
+        out_df_pw.at[index, 'password'] = school.lower().capitalize() + '' + str(row['student_number'])
+        out_df_pw.at[index, 'Modify'] = True
+
+    out_df_pw_by_school = out_df_pw.groupby(out_df_pw.password.str[:3])
+    for pw_group, pw_data in out_df_pw_by_school:
+        pw_output_file = os.path.join(output_dir, file_name + '_' + pw_group + '_password_reset.csv')
+        print(pw_group)
+        pw_data.to_csv(pw_output_file, index=False)
 
     out_df_by_school = out_df.groupby(['department', 'grade'])
     for group, data in out_df_by_school:
