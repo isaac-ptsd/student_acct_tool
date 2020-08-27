@@ -3,6 +3,8 @@ from gooey import Gooey, GooeyParser
 import pandas as pd
 import os.path
 
+# TODO handle special chars like accents, and tildes ex: ñ, ú, á
+
 
 def isNaN(num):
     return num != num
@@ -29,7 +31,7 @@ def main():
 
     # NOTE: the in_df columns are: ['student_number', 'last_name', 'first_name', 'grade_level', 'school_id',
     #                               'web_id', 'web_password', 'student_web_id', 'student_web_password', 'student_email]
-    in_df = pd.read_csv(ps_export_csv_in)
+    in_df = pd.read_csv(ps_export_csv_in, encoding='latin1')
     out_df = pd.DataFrame(columns=['cn',
                                    'department',
                                    'description',
