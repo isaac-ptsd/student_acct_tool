@@ -36,3 +36,6 @@ WHERE
     OR
     enroll_status = 0;
 ```
+
+NOTE: Some students will not have an email entered saved in PS SIS.
+We need to verify against the Google account management system.  
