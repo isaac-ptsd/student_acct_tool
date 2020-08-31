@@ -4,6 +4,7 @@ import pandas as pd
 import os.path
 
 # TODO: handle special chars like accents, and tildes ex: ñ, ú, á
+# TODO: Handle Names like: De La Cruz, Del Rio, Ah San, Van Ness
 
 
 def isNaN(num):
@@ -67,7 +68,17 @@ def main():
         else:
             grade_level = '0' + str(row['grade_level'])
 
-        last_name = row['last_name'].replace('-', ' ').split()[0]
+        # Last name logic to acct for "compound" names eg: De La Cruz
+        last_name = row['last_name'].replace('-', ' ').lower().split()
+        if len(last_name) >= 2:
+            if last_name[0] == 'de' and last_name[1] == 'la':
+                last_name = last_name[0].capitalize() + last_name[1].capitalize() + last_name[2].capitalize()
+            elif (last_name[0] == 'de' and last_name[1] != 'la') or (last_name[0] == 'ah') or (last_name[0] == 'van'):
+                last_name = last_name[0].capitalize() + last_name[1].capitalize()
+            else:
+                last_name = last_name[0].capitalize()
+        else:
+            last_name = last_name[0].capitalize()
         last_name = ''.join(i for i in last_name if i not in bad_chars)
 
         first_name = row['first_name']
