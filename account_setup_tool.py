@@ -3,7 +3,7 @@ from gooey import Gooey, GooeyParser
 import pandas as pd
 import os.path
 
-# TODO handle special chars like accents, and tildes ex: ñ, ú, á
+# TODO: handle special chars like accents, and tildes ex: ñ, ú, á
 
 
 def isNaN(num):
@@ -78,7 +78,7 @@ def main():
             first_last = first_name[:1] + '.' + last_name
 
         student_email = row['student_email']
-        if isNaN(student_email):
+        if isNaN(student_email) or '@phoenixk12.org' not in student_email:
             student_email = first_last + '@phoenixk12.org'
 
         # 0 + grade_level + " " + last_name + ", " first_name
