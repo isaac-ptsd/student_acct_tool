@@ -2,7 +2,8 @@
 
 will be used to automate the initial setup required for student account creation. 
 
-This program will read in a csv file generated out of PowerSchool, and prepare it for use with the DoveStone Active Directory softwear. 
+This program will read in a csv file generated out of PowerSchool, 
+and prepare it for use with the DoveStone Active Directory software. 
 
 To build the executable: 
 `pyinstaller --noconsole --hidden-import=pkg_resources.py2_warn --onefile account_setup_tool.py`
@@ -38,4 +39,6 @@ WHERE
 ```
 
 NOTE: Some students will not have an email entered saved in PS SIS.
-We need to verify against the Google account management system.  
+We need to verify against the Google account management system.
+
+NOTE: currently the app will only read column headings if they match perfectlly.. (watch lowercase v uppercase)

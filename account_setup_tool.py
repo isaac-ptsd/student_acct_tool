@@ -30,6 +30,7 @@ def main():
     file_name = user_inputs['File Name']
     ps_export_csv_in = user_inputs['PowerSchool Data Export']
 
+    # TODO format column headings to lowercase when reading the csv file
     # NOTE: the in_df columns are: ['student_number', 'last_name', 'first_name', 'grade_level', 'school_id',
     #                               'web_id', 'web_password', 'student_web_id', 'student_web_password', 'student_email]
     in_df = pd.read_csv(ps_export_csv_in, encoding='latin1')
@@ -56,7 +57,7 @@ def main():
     out_df_pw = pd.DataFrame(columns=['memberOf', 'sAMAccountName', 'password', 'Modify'])
 
     school_dict = {374: 'PHS', 373: 'TMS', 372: 'TES', 371: 'PES', 370: 'OES', 3247: 'ATI', 375: 'STEPS',
-                   376: 'Transition', 1474: 'Crossroads'}
+                   376: 'Transition', 1474: 'Crossroads', 377: 'PTRA', 79438: 'ENR'}
     # populate out_df
     bad_chars = [';', ':', '!', "*", '\'', '\"', '`']
     for index, row in in_df.iterrows():
@@ -117,7 +118,7 @@ def main():
         # Phs18648
         out_df.at[index, 'Password'] = school.lower().capitalize() + '' + str(row['student_number'])
         # 010FirstName.LastName
-        out_df.at[index, 'userPrincipalName'] = grade_level + first_last
+        out_df.at[index, 'userPrincipalName'] = grade_level + first_last  # TODO: add domain????
         # always True
         out_df.at[index, 'CreateHomeDirectory'] = 'True'
         # student number
