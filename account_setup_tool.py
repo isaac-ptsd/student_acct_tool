@@ -13,6 +13,9 @@ def isNaN(num):
 
 @Gooey(program_name="Account Setup Tool")
 def main():
+    # student domain:
+    std_domain = '@phoenixk12.org'
+
     parser = GooeyParser(description='PowerSchool export to Dovestone/Active Directory import file')
     parser.add_argument('Save Location',
                         action='store',
@@ -90,8 +93,8 @@ def main():
             first_last = first_name[:1] + '.' + last_name
 
         student_email = row['student_email']
-        if isNaN(student_email) or '@phoenixk12.org' not in student_email:
-            student_email = first_last + '@phoenixk12.org'
+        if isNaN(student_email) or std_domain not in student_email:
+            student_email = first_last + std_domain
 
         # 0 + grade_level + " " + last_name + ", " first_name
         out_df.at[index, 'cn'] = grade_level + ' ' + last_name + ', ' + first_name
@@ -118,7 +121,7 @@ def main():
         # Phs18648
         out_df.at[index, 'Password'] = school.lower().capitalize() + '' + str(row['student_number'])
         # 010FirstName.LastName
-        out_df.at[index, 'userPrincipalName'] = grade_level + first_last  # TODO: add domain????
+        out_df.at[index, 'userPrincipalName'] = grade_level + first_last + std_domain  # TODO: add domain????
         # always True
         out_df.at[index, 'CreateHomeDirectory'] = 'True'
         # student number
