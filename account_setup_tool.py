@@ -7,11 +7,12 @@ import os.path
 def isNaN(num):
     return num != num
 
+# TODO: enrollment school to -> will attend school
+
 
 @Gooey(program_name="Account Setup Tool")
 def main():
-    # student domain:
-    std_domain = '@phoenixk12.org'
+    std_domain = '@phoenixk12.org'  # student domain
 
     parser = GooeyParser(description='PowerSchool export to Dovestone/Active Directory import file')
     parser.add_argument('Save Location',

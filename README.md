@@ -16,10 +16,18 @@ SELECT
     students.last_name as last_name,
     students.first_name as first_name,
     students.grade_level as grade_level,
-    students.schoolid as school_id,
-    emailaddress.emailaddress as student**_email
+    CASE 
+        students.schoolid when 79438 then to_number(U_ECOLLECT_ENROLL.SCHOOLID)
+        ELSE 
+        students.schoolid 
+    END as school_id,
+    emailaddress.emailaddress as student_email
 FROM 
     students
+    LEFT OUTER JOIN
+    U_ECOLLECT_ENROLL 
+    ON
+        u_ecollect_enroll.studentsdcid = students.dcid
     LEFT OUTER JOIN
         person
         ON 
@@ -35,7 +43,7 @@ FROM
 WHERE 
     enroll_status = -1 
     OR
-    enroll_status = 0;
+    enroll_status = 0
 ```
 
 NOTE: Some students will not have an email entered saved in PS SIS.
