@@ -17,7 +17,7 @@ SELECT
     students.first_name as first_name,
     students.grade_level as grade_level,
     students.schoolid as school_id,
-    emailaddress.emailaddress as student_email
+    emailaddress.emailaddress as student**_email
 FROM 
     students
     LEFT OUTER JOIN

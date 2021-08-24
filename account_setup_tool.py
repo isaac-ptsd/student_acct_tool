@@ -33,10 +33,10 @@ def main():
     file_name = user_inputs['File Name']
     ps_export_csv_in = user_inputs['PowerSchool Data Export']
 
-    # TODO format column headings to lowercase when reading the csv file
     # NOTE: the in_df columns are: ['student_number', 'last_name', 'first_name', 'grade_level', 'school_id',
     #                               'web_id', 'web_password', 'student_web_id', 'student_web_password', 'student_email]
     in_df = pd.read_csv(ps_export_csv_in, encoding='latin1')
+    in_df.columns = map(str.lower, in_df.columns)  # column names to lowercase
     out_df = pd.DataFrame(columns=['cn',
                                    'department',
                                    'description',
