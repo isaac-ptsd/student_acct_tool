@@ -3,9 +3,6 @@ from gooey import Gooey, GooeyParser
 import pandas as pd
 import os.path
 
-# TODO: handle special chars like accents, and tildes ex: ñ, ú, á
-# TODO: Handle Names like: De La Cruz, Del Rio, Ah San, Van Ness
-
 
 def isNaN(num):
     return num != num
@@ -121,7 +118,7 @@ def main():
         # Phs18648
         out_df.at[index, 'Password'] = school.lower().capitalize() + '' + str(row['student_number'])
         # 010FirstName.LastName
-        out_df.at[index, 'userPrincipalName'] = grade_level + first_last + std_domain  # TODO: add domain????
+        out_df.at[index, 'userPrincipalName'] = grade_level + first_last + std_domain  # TODO: Test with domain added
         # always True
         out_df.at[index, 'CreateHomeDirectory'] = 'True'
         # student number
