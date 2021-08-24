@@ -41,4 +41,3 @@ WHERE
 NOTE: Some students will not have an email entered saved in PS SIS.
 We need to verify against the Google account management system.
 
-NOTE: currently the app will only read column headings if they match perfectlly.. (watch lowercase v uppercase)
