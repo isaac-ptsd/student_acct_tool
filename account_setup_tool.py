@@ -7,8 +7,6 @@ import os.path
 def isNaN(num):
     return num != num
 
-# TODO: enrollment school to -> will attend school
-
 
 @Gooey(program_name="Account Setup Tool")
 def main():
