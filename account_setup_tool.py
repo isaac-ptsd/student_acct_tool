@@ -57,12 +57,13 @@ def main():
                                    'destinationOU',
                                    'memberOf',
                                    'PasswordNeverExpires',
-                                   'UserCannotChangePassword'])
+                                   'UserCannotChangePassword',
+                                   'Office'])
     # Data frame to create CSV for resetting passwords
     out_df_pw = pd.DataFrame(columns=['memberOf', 'sAMAccountName', 'password', 'Modify'])
 
     school_dict = {374: 'PHS', 373: 'TMS', 372: 'TES', 371: 'PES', 370: 'OES', 3247: 'ATI', 375: 'STEPS',
-                   376: 'Transition', 1474: 'Crossroads', 377: 'PTRA', 79438: 'ENR'}
+                   376: 'Transition', 1474: 'Crossroads', 377: 'PTR', 79438: 'ENR'}
     # populate out_df
     bad_chars = [';', ':', '!', "*", '\'', '\"', '`']
     for index, row in in_df.iterrows():
@@ -97,13 +98,14 @@ def main():
             first_name = row['first_name']
             first_name = ''.join(i for i in first_name if i not in bad_chars)
 
-            first_last = first_name + '.' + last_name
-            if len(first_last) >= 18:
-                first_last = first_name[:1] + '.' + last_name
         else:
             name_split = row['student_web_id'].split('.')
             first_name = name_split[0][2:]  # strips the grade level off the first name (01john -> john)
             last_name = name_split[1]
+
+        first_last = first_name + '.' + last_name
+        if len(first_last) >= 18:
+            first_last = first_name[:1] + '.' + last_name
 
         #  END NAME LOGIC
 
@@ -136,7 +138,7 @@ def main():
         # Phs18648
         out_df.at[index, 'Password'] = school.lower().capitalize() + '' + str(row['student_number'])
         # 010FirstName.LastName
-        out_df.at[index, 'userPrincipalName'] = grade_level + first_last + std_domain  # TODO: Test with domain added
+        out_df.at[index, 'userPrincipalName'] = grade_level + first_last + std_domain
         # always True
         out_df.at[index, 'CreateHomeDirectory'] = 'True'
         # student number
@@ -153,6 +155,7 @@ def main():
         out_df.at[index, 'PasswordNeverExpires'] = 'True'
         # always True
         out_df.at[index, 'UserCannotChangePassword'] = 'True'
+        out_df.at[index, 'Office'] = school
 
         # create CSV to reset passwords
         out_df_pw.at[index, 'memberOf'] = 'CN=' + school.lower().capitalize() \
