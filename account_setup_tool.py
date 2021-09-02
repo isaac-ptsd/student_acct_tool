@@ -164,15 +164,29 @@ def main():
         out_df_pw.at[index, 'password'] = school.lower().capitalize() + '' + str(row['student_number'])
         out_df_pw.at[index, 'Modify'] = True
 
-    out_df_pw_by_school = out_df_pw.groupby(out_df_pw.password.str[:3])
-    for pw_group, pw_data in out_df_pw_by_school:
-        pw_output_file = os.path.join(output_dir, file_name + '_' + pw_group + '_password_reset.csv')
-        pw_data.to_csv(pw_output_file, index=False)
+    ####################################################################################################################
+    # We don't seem to need this with the latest version of google sync:
+    # out_df_pw_by_school = out_df_pw.groupby(out_df_pw.password.str[:3])
+    # for pw_group, pw_data in out_df_pw_by_school:
+    #     pw_output_file = os.path.join(output_dir, file_name + '_' + pw_group + '_password_reset.csv')
+    #     pw_data.to_csv(pw_output_file, index=False)
+    ####################################################################################################################
 
     out_df_by_school = out_df.groupby(['department', 'grade'])
     for group, data in out_df_by_school:
         output_file = os.path.join(output_dir, file_name + '_' + group[0] + '_' + group[1] + '.csv')
         data.to_csv(output_file, index=False)
+
+    master_output_file = os.path.join(output_dir, 'MASTER_' + file_name + '.csv')
+    out_df.to_csv(master_output_file, index=False)
+
+    account_output_file = os.path.join(output_dir, 'SIS_account_import_' + file_name + '.csv')
+    account_file_df = out_df[['id', 'sAMAccountName', 'Password']].copy()
+    account_file_df.to_csv(account_output_file, index=False)
+
+    email_output_file = os.path.join(output_dir, 'SIS_email_import_' + file_name + '.csv')
+    email_file_df = out_df[['id', 'mail']].copy()
+    email_file_df.to_csv(email_output_file, index=False)
 
 
 if __name__ == '__main__':
