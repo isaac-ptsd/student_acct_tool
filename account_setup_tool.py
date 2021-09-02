@@ -3,6 +3,11 @@ from gooey import Gooey, GooeyParser
 import pandas as pd
 import os.path
 
+# global variables
+last_name = ""
+first_name = ""
+first_last = ""
+
 
 def isNaN(num):
     return num != num
@@ -30,7 +35,8 @@ def main():
     ps_export_csv_in = user_inputs['PowerSchool Data Export']
 
     # NOTE: the in_df columns are: ['student_number', 'last_name', 'first_name', 'grade_level', 'school_id',
-    #                               'web_id', 'web_password', 'student_web_id', 'student_web_password', 'student_email]
+    #                               'web_id', 'web_password', 'student_web_id', 'student_web_password',
+    #                               'student_email', 'student_web_id']
     in_df = pd.read_csv(ps_export_csv_in, encoding='latin1')
     in_df.columns = map(str.lower, in_df.columns)  # column names to lowercase
     out_df = pd.DataFrame(columns=['cn',
@@ -51,15 +57,20 @@ def main():
                                    'destinationOU',
                                    'memberOf',
                                    'PasswordNeverExpires',
-                                   'UserCannotChangePassword'])
+                                   'UserCannotChangePassword',
+                                   'Office'])
     # Data frame to create CSV for resetting passwords
     out_df_pw = pd.DataFrame(columns=['memberOf', 'sAMAccountName', 'password', 'Modify'])
 
     school_dict = {374: 'PHS', 373: 'TMS', 372: 'TES', 371: 'PES', 370: 'OES', 3247: 'ATI', 375: 'STEPS',
-                   376: 'Transition', 1474: 'Crossroads', 377: 'PTRA', 79438: 'ENR'}
+                   376: 'Transition', 1474: 'Crossroads', 377: 'PTR', 79438: 'ENR'}
     # populate out_df
     bad_chars = [';', ':', '!', "*", '\'', '\"', '`']
     for index, row in in_df.iterrows():
+        global last_name
+        global first_name
+        global first_last
+
         school = school_dict[row['school_id']]
         ou_str = 'OU=' + school.lower() + ',OU=Students,DC=phoenix,DC=k12,DC=or,DC=us'
 
@@ -68,25 +79,35 @@ def main():
         else:
             grade_level = '0' + str(row['grade_level'])
 
-        # Last name logic to acct for "compound" names eg: De La Cruz
-        last_name = row['last_name'].replace('-', ' ').lower().split()
-        if len(last_name) >= 2:
-            if last_name[0] == 'de' and last_name[1] == 'la':
-                last_name = last_name[0].capitalize() + last_name[1].capitalize() + last_name[2].capitalize()
-            elif (last_name[0] == 'de' and last_name[1] != 'la') or (last_name[0] == 'ah') or (last_name[0] == 'van'):
-                last_name = last_name[0].capitalize() + last_name[1].capitalize()
+        #  NAME LOGIC
+        # TODO: check for student_web_id, if present, use for last_name, first_name and first_last
+
+        if isNaN(row['student_web_id']) or row['student_web_id'].find('.') == -1:
+            last_name = row['last_name'].replace('-', ' ').lower().split()
+            if len(last_name) >= 2:
+                if last_name[0] == 'de' and last_name[1] == 'la':
+                    last_name = last_name[0].capitalize() + last_name[1].capitalize() + last_name[2].capitalize()
+                elif (last_name[0] == 'de' and last_name[1] != 'la') or (last_name[0] == 'ah') or (last_name[0] == 'van'):
+                    last_name = last_name[0].capitalize() + last_name[1].capitalize()
+                else:
+                    last_name = last_name[0].capitalize()
             else:
                 last_name = last_name[0].capitalize()
-        else:
-            last_name = last_name[0].capitalize()
-        last_name = ''.join(i for i in last_name if i not in bad_chars)
+            last_name = ''.join(i for i in last_name if i not in bad_chars)
 
-        first_name = row['first_name']
-        first_name = ''.join(i for i in first_name if i not in bad_chars)
+            first_name = row['first_name']
+            first_name = ''.join(i for i in first_name if i not in bad_chars)
+
+        else:
+            name_split = row['student_web_id'].split('.')
+            first_name = name_split[0][2:]  # strips the grade level off the first name (01john -> john)
+            last_name = name_split[1]
 
         first_last = first_name + '.' + last_name
         if len(first_last) >= 18:
             first_last = first_name[:1] + '.' + last_name
+
+        #  END NAME LOGIC
 
         student_email = row['student_email']
         if isNaN(student_email) or std_domain not in student_email:
@@ -117,7 +138,7 @@ def main():
         # Phs18648
         out_df.at[index, 'Password'] = school.lower().capitalize() + '' + str(row['student_number'])
         # 010FirstName.LastName
-        out_df.at[index, 'userPrincipalName'] = grade_level + first_last + std_domain  # TODO: Test with domain added
+        out_df.at[index, 'userPrincipalName'] = grade_level + first_last + std_domain
         # always True
         out_df.at[index, 'CreateHomeDirectory'] = 'True'
         # student number
@@ -134,6 +155,7 @@ def main():
         out_df.at[index, 'PasswordNeverExpires'] = 'True'
         # always True
         out_df.at[index, 'UserCannotChangePassword'] = 'True'
+        out_df.at[index, 'Office'] = school
 
         # create CSV to reset passwords
         out_df_pw.at[index, 'memberOf'] = 'CN=' + school.lower().capitalize() \
