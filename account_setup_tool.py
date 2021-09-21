@@ -9,8 +9,8 @@ first_name = ""
 first_last = ""
 
 
-def isNaN(num):
-    return num != num
+def isEmpty(df_value):
+    return df_value != df_value
 
 
 @Gooey(program_name="Account Setup Tool")
@@ -82,7 +82,7 @@ def main():
         #  NAME LOGIC
         # TODO: check for student_web_id, if present, use for last_name, first_name and first_last
 
-        if isNaN(row['student_web_id']) or row['student_web_id'].find('.') == -1:
+        if isEmpty(row['student_web_id']) or row['student_web_id'].find('.') == -1:
             last_name = row['last_name'].replace('-', ' ').lower().split()
             if len(last_name) >= 2:
                 if last_name[0] == 'de' and last_name[1] == 'la':
@@ -110,7 +110,7 @@ def main():
         #  END NAME LOGIC
 
         student_email = row['student_email']
-        if isNaN(student_email) or std_domain not in student_email:
+        if isEmpty(student_email) or std_domain not in student_email:
             student_email = first_last + std_domain
 
         # 0 + grade_level + " " + last_name + ", " first_name
@@ -164,12 +164,15 @@ def main():
         out_df_pw.at[index, 'password'] = school.lower().capitalize() + '' + str(row['student_number'])
         out_df_pw.at[index, 'Modify'] = True
 
-    ####################################################################################################################
+    ###################################### PASSWORD REST FILES #########################################################
     # We don't seem to need this with the latest version of google sync:
-    # out_df_pw_by_school = out_df_pw.groupby(out_df_pw.password.str[:3])
-    # for pw_group, pw_data in out_df_pw_by_school:
-    #     pw_output_file = os.path.join(output_dir, file_name + '_' + pw_group + '_password_reset.csv')
-    #     pw_data.to_csv(pw_output_file, index=False)
+    out_df_pw_by_school = out_df_pw.groupby(out_df_pw.password.str[:3])
+    for pw_group, pw_data in out_df_pw_by_school:
+        pw_output_file = os.path.join(output_dir, file_name + '_' + pw_group + '_password_reset.csv')
+        pw_data.to_csv(pw_output_file, index=False)
+
+    master_password_file = os.path.join(output_dir, 'MASTER_PASSWORD_RS_' + file_name + '.csv')
+    out_df.to_csv(master_password_file, index=False)
     ####################################################################################################################
 
     out_df_by_school = out_df.groupby(['department', 'grade'])
