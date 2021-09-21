@@ -18,6 +18,9 @@ SELECT
     students.grade_level as grade_level,
     students.student_web_id,
     CASE 
+        -- I use the U_ECOLLECT_ENROLL.SCHOOLID field for students at the enrollment school
+        -- this will ensure that new students will have their accounts setup for the school
+        -- they will be attending and NOT the enrollment school
         students.schoolid when 79438 then to_number(U_ECOLLECT_ENROLL.SCHOOLID)
         ELSE 
         students.schoolid 

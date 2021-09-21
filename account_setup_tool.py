@@ -105,7 +105,6 @@ def main():
         first_last = first_name + '.' + last_name
         if len(first_last) >= 18:
             first_last = first_name[:1] + '.' + last_name
-
         #  END NAME LOGIC
 
         student_email = row['student_email']
