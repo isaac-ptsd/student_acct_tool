@@ -80,8 +80,7 @@ def main():
             grade_level = '0' + str(row['grade_level'])
 
         #  NAME LOGIC
-        # TODO: check for student_web_id, if present, use for last_name, first_name and first_last
-
+        # I am checking for student_web_id, if present, use for last_name, first_name and first_last
         if isEmpty(row['student_web_id']) or row['student_web_id'].find('.') == -1:
             last_name = row['last_name'].replace('-', ' ').lower().split()
             if len(last_name) >= 2:
